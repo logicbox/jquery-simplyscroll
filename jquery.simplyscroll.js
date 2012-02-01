@@ -8,7 +8,7 @@
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Last revised: 31/01/2012
+ * Version: 2.0.1 Last revised: 1/02/2012
  *
  */
 
@@ -29,8 +29,9 @@ var defaults = {
 	autoMode: 'loop', //auto = true, 'loop' or 'bounce',
 	manualMode: 'end', //auto = false, 'loop' or 'end'
 	direction: 'forwards', //'forwards' or 'backwards'.
-	pauseOnHover: true,
-	pauseButton: false, //generates an extra element to allow manual pausing autoMode = loop|bounce only
+	pauseOnHover: true, //autoMode = loop|bounce only
+	pauseOnTouch: true, //" touch device only
+	pauseButton: false, //" generates an extra element to allow manual pausing 
 	startOnLoad: false //use this to delay starting of plugin until all page assets have loaded
 };
 	
@@ -44,6 +45,23 @@ $.simplyScroll = function(el,options) {
 	this.isRTL = this.isHorizontal && $("html").attr('dir') == 'rtl';
 	this.isForwards = !this.isAuto  || (this.isAuto && this.o.direction.match(/^forwards|backwards$/)!==null && this.o.direction==defaults.direction) && !this.isRTL;
 	this.isLoop = this.isAuto && this.o.autoMode == 'loop' || !this.isAuto && this.o.manualMode == 'loop';
+	
+	//can't remember where I borrowed this from
+	this.supportsTouch = (function(){
+		if ("createTouch" in document){ // True on the iPhone
+			return true;
+		}
+		try{
+			var event = document.createEvent("TouchEvent"); // Should throw an error if not supported
+			return !!event.initTouchEvent; // Check for existance of initialization method
+		} catch(error){
+			return false;
+		}
+	}());
+	
+	this.events = this.supportsTouch ? 
+		{start:'touchstart MozTouchDown',move:'touchmove MozTouchMove',end:'touchend touchcancel MozTouchRelease'} : 
+		{start:'mouseenter',end:'mouseleave'};
 	
 	this.$list = $(el); //called on ul/ol/div etc
 	var $items = this.$list.children();
@@ -167,25 +185,23 @@ $.simplyScroll.fn.extend({
 			var items_append  = this.$items.slice(0,addItems).clone(true).appendTo(this.$list);
 			var items_prepend = this.$items.slice(-addItems).clone(true).prependTo(this.$list);
 			
-			//console.log(items_append,items_prepend)
-			
 			this.resetPositionForwards = this.resetPosition = addItems * this.itemMax;
 			this.resetPositionBackwards = this.$items.length * this.itemMax;
 			
 			//extra events to force scroll direction change
 			var self = this;
 			
-			this.$btnBack.bind('mouseenter touchstart MozTouchDown',function() {
+			this.$btnBack.bind(this.events.start,function() {
 				self.isForwards = false;
 				self.resetPosition = self.resetPositionBackwards;
 			});
 			
-			this.$btnForward.bind('mouseenter touchstart MozTouchDown',function() {
+			this.$btnForward.bind(this.events.start,function() {
 				self.isForwards = true;
 				self.resetPosition = self.resetPositionForwards;
 			});
 			
-		} else { //(!this.isAuto && this.o.manualMode=='end') //bounce
+		} else { //(!this.isAuto && this.o.manualMode=='end') 
 			
 			this.$list.css(this.dimension,this.posMax +'px');
 			
@@ -218,7 +234,10 @@ $.simplyScroll.fn.extend({
 		
 		var self = this;
 		this.trigger = null;
-		this.funcMoveBack = function() { 
+		this.funcMoveBack = function(e) { 
+			if (e !== undefined) {
+				e.preventDefault();
+			}
 			self.trigger = !self.isAuto && self.o.manualMode=='end' ? this : null;
 			if (self.isAuto) {
 				self.isForwards ? self.moveBack() : self.moveForward(); 
@@ -226,7 +245,10 @@ $.simplyScroll.fn.extend({
 				self.moveBack();	
 			}
 		};
-		this.funcMoveForward = function() { 
+		this.funcMoveForward = function(e) { 
+			if (e !== undefined) {
+				e.preventDefault();
+			}
 			self.trigger = !self.isAuto && self.o.manualMode=='end' ? this : null;
 			if (self.isAuto) {
 				self.isForwards ? self.moveForward() : self.moveBack(); 
@@ -237,23 +259,62 @@ $.simplyScroll.fn.extend({
 		this.funcMoveStop = function() { self.moveStop(); };
 		this.funcMoveResume = function() { self.moveResume(); };
 		
+		
+		
 		if (this.isAuto) {
-			if (this.o.pauseOnHover) {
-				this.$clip.hover(this.funcMoveStop,this.funcMoveResume);
+			
+			this.paused = false;
+			
+			function togglePause() {
+				if (self.paused===false) {
+					self.paused=true;
+					self.funcMoveStop();
+				} else {
+					self.paused=false;
+					self.funcMoveResume();
+				}
+				return self.paused;
+			};
+			
+			if (this.isAuto && this.o.pauseOnHover && !this.supportsTouch) {
+				this.$clip.bind(this.events.start,this.funcMoveStop).bind(this.events.end,this.funcMoveResume);
+			} else if (this.isAuto && this.o.pauseOnTouch && !this.o.pauseButton && this.supportsTouch) {
+				
+				var touchStartPos, scrollStartPos;
+				
+				this.$clip.bind(this.events.start,function(e) {
+					togglePause();
+					var touch = e.originalEvent.touches[0];
+					touchStartPos = self.isHorizontal ? touch.pageX : touch.pageY;
+					scrollStartPos = self.$clip[0]['scroll' + self.scrollPos];
+					e.stopPropagation();
+					e.preventDefault();
+					
+				}).bind(this.events.move,function(e) {
+					
+					e.stopPropagation();
+					e.preventDefault();
+					
+					var touch = e.originalEvent.touches[0],
+						endTouchPos = self.isHorizontal ? touch.pageX : touch.pageY,
+						pos = (endTouchPos - touchStartPos) + scrollStartPos;
+					
+					if (pos < 0) pos = 0;
+					else if (pos > self.posMax) pos = self.posMax;
+					
+					self.$clip[0]['scroll' + self.scrollPos] = pos;
+					
+					//force pause
+					self.funcMoveStop();
+					self.paused = true;
+				});	
 			} else {
 				if (this.o.pauseButton) {
-					this.paused = false;
+					
 					this.$btnPause = $(".simply-scroll-btn-pause",this.$container)
-						.bind('click',function() {
-							if (self.paused===false) {
-								self.paused=true;
-								self.funcMoveStop();
-								$(this).addClass('active');
-							} else {
-								self.paused=false;
-								self.funcMoveResume();
-								$(this).removeClass('active');
-							}
+						.bind('click',function(e) {
+							e.preventDefault();
+							togglePause() ? $(this).addClass('active') : $(this).removeClass('active');
 					});
 				}
 			}
@@ -262,10 +323,10 @@ $.simplyScroll.fn.extend({
 
 			this.$btnBack 
 				.addClass('simply-scroll-btn' + ' ' + this.moveBackClass)
-				.bind("mouseenter touchstart MozTouchDown",this.funcMoveBack).bind("mouseleave touchend MozTouchRelease",this.funcMoveStop);
+				.bind(this.events.start,this.funcMoveBack).bind(this.events.end,this.funcMoveStop);
 			this.$btnForward
 				.addClass('simply-scroll-btn' + ' ' + this.moveForwardClass)
-				.bind("mouseenter touchstart MozTouchDown",this.funcMoveForward).bind("mouseleave touchend MozTouchRelease",this.funcMoveStop);
+				.bind(this.events.start,this.funcMoveForward).bind(this.events.end,this.funcMoveStop);
 				
 			if (this.o.manualMode == 'end') {
 				!this.isRTL ? this.$btnBack.addClass('disabled') : this.$btnForward.addClass('disabled');	

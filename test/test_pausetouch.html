@@ -3,15 +3,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>jQuery simplyScroll - Logicbox</title>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js">
 </script>
-<!--<script type="text/javascript" src="/js/common.js"></script>-->
 <script type="text/javascript" src="../jquery.simplyscroll.js"></script>
 <link rel="stylesheet" href="../jquery.simplyscroll.css" media="all" type="text/css">
 <script type="text/javascript">
 (function($) {
 	$(function() {
-		$("#scroller").simplyScroll();
+		$("#scroller").simplyScroll({
+			pauseOnTouch: true,
+			pauseOnHover: false
+		});
 	});
 })(jQuery);
 </script>
