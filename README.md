@@ -1,11 +1,11 @@
 jQuery simplyScroll 2
 =====================
 
-2.0.1 1/02/12. Created by Will Kelly [@logicbox](http://twitter.com/logicbox)
+2.0.2 6/02/12. Created by Will Kelly [@logicbox](http://twitter.com/logicbox)
 
 simplyScroll is a jQuery plugin that can animate (scroll) a set of elements either automatically or manually, 
 horizontally or vertically, forwards or backwards. This plugin can be performance intensive, so speed and 
-framerate are fully configureable to accomodate lower spec systems.
+framerate are fully configureable to accommodate lower spec systems.
 
 ## New in V2 ##
 
@@ -13,6 +13,7 @@ framerate are fully configureable to accomodate lower spec systems.
 * RTL support, normalises browser RTL scroll implementations
 * Touch support
 * Now supports unequal sized elements in loop mode
+* Pause/resume
 
 ## Features ##
 

@@ -8,7 +8,7 @@
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Version: 2.0.1 Last revised: 1/02/2012
+ * Version: 2.0.2 Last revised: 6/02/2012
  *
  */
 
@@ -75,9 +75,6 @@ $.simplyScroll = function(el,options) {
 		this.$list.parent().parent()
 		.prepend('<div class="simply-scroll-forward"></div>')
 		.prepend('<div class="simply-scroll-back"></div>');
-		
-		this.$btnBack = $('.simply-scroll-back',this.$container);
-		this.$btnForward = $('.simply-scroll-forward',this.$container);
 	} else {
 		if (this.o.pauseButton) {
 			this.$list.parent().parent()
@@ -129,6 +126,8 @@ $.simplyScroll.fn.extend({
 		this.$items = this.$list.children();
 		this.$clip = this.$list.parent(); //this is the element that scrolls
 		this.$container = this.$clip.parent();
+		this.$btnBack = $('.simply-scroll-back',this.$container);
+		this.$btnForward = $('.simply-scroll-forward',this.$container);
 
 		if (!this.isHorizontal) {
 			this.itemMax = this.$items.eq(0).outerHeight(true); 
