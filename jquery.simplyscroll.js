@@ -1,14 +1,13 @@
 /*
  * simplyScroll 2 - a scroll-tastic jQuery plugin
  *
- * http://logicbox.net/jquery/simplyscroll
- * http://plugins.jquery.com/project/simplyScroll
+ * http://logicbox.net/jquery/simplyscroll/
  *
  * Copyright (c) 2009-2012 Will Kelly - http://logicbox.net
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Version: 2.0.2 Last revised: 6/02/2012
+ * Version: 2.0.3 Last revised: 11/02/2012
  *
  */
 
@@ -46,18 +45,7 @@ $.simplyScroll = function(el,options) {
 	this.isForwards = !this.isAuto  || (this.isAuto && this.o.direction.match(/^forwards|backwards$/)!==null && this.o.direction==defaults.direction) && !this.isRTL;
 	this.isLoop = this.isAuto && this.o.autoMode == 'loop' || !this.isAuto && this.o.manualMode == 'loop';
 	
-	//can't remember where I borrowed this from
-	this.supportsTouch = (function(){
-		if ("createTouch" in document){ // True on the iPhone
-			return true;
-		}
-		try{
-			var event = document.createEvent("TouchEvent"); // Should throw an error if not supported
-			return !!event.initTouchEvent; // Check for existance of initialization method
-		} catch(error){
-			return false;
-		}
-	}());
+	this.supportsTouch = ('createTouch' in document);
 	
 	this.events = this.supportsTouch ? 
 		{start:'touchstart MozTouchDown',move:'touchmove MozTouchMove',end:'touchend touchcancel MozTouchRelease'} : 
