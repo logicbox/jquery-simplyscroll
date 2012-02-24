@@ -7,7 +7,7 @@
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Version: 2.0.3 Last revised: 11/02/2012
+ * Version: 2.0.4 Last revised: 24/02/2012
  *
  */
 
@@ -163,7 +163,7 @@ $.simplyScroll.fn.extend({
 		//manual and loop
 		} else if (!this.isAuto && this.o.manualMode=='loop') {
 			
-			this.posMax += this.itemMax * 2;
+			this.posMax += this.itemMax * addItems;
 			
 			this.$list.css(this.dimension,this.posMax+(this.itemMax*addItems) +'px');
 			
