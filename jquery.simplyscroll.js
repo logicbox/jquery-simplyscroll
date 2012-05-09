@@ -284,7 +284,7 @@ $.simplyScroll.fn.extend({
 					
 					var touch = e.originalEvent.touches[0],
 						endTouchPos = self.isHorizontal ? touch.pageX : touch.pageY,
-						pos = (endTouchPos - touchStartPos) + scrollStartPos;
+						pos = (touchStartPos - endTouchPos) + scrollStartPos;
 					
 					if (pos < 0) pos = 0;
 					else if (pos > self.posMax) pos = self.posMax;
