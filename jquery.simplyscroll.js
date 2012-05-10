@@ -7,7 +7,7 @@
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Version: 2.0.4 Last revised: 24/02/2012
+ * Version: 2.0.5 Last revised: 10/05/2012
  *
  */
 
@@ -156,7 +156,10 @@ $.simplyScroll.fn.extend({
 				//due to inconsistent RTL implementation force back to LTR then fake
 				if (this.isRTL) {
 					this.$clip[0].dir = 'ltr';
-					//this.$items.css('float','right');
+					if (this.isHorizontal()) {
+						//based on feedback seems a good idea to force float right
+						this.$items.css('float','right');
+					}
 				}
 			}
 		
@@ -243,6 +246,7 @@ $.simplyScroll.fn.extend({
 				self.moveForward();	
 			}
 		};
+		this.funcMovePause = function() { self.movePause(); };
 		this.funcMoveStop = function() { self.moveStop(); };
 		this.funcMoveResume = function() { self.moveResume(); };
 		
@@ -255,7 +259,7 @@ $.simplyScroll.fn.extend({
 			function togglePause() {
 				if (self.paused===false) {
 					self.paused=true;
-					self.funcMoveStop();
+					self.funcMovePause();
 				} else {
 					self.paused=false;
 					self.funcMoveResume();
@@ -263,8 +267,13 @@ $.simplyScroll.fn.extend({
 				return self.paused;
 			};
 			
+			//disable pauseTouch when links are present
+			if (this.supportsTouch && this.$items.find('a').length) {
+				this.supportsTouch=false;
+			}
+			
 			if (this.isAuto && this.o.pauseOnHover && !this.supportsTouch) {
-				this.$clip.bind(this.events.start,this.funcMoveStop).bind(this.events.end,this.funcMoveResume);
+				this.$clip.bind(this.events.start,this.funcMovePause).bind(this.events.end,this.funcMoveResume);
 			} else if (this.isAuto && this.o.pauseOnTouch && !this.o.pauseButton && this.supportsTouch) {
 				
 				var touchStartPos, scrollStartPos;
@@ -292,7 +301,7 @@ $.simplyScroll.fn.extend({
 					self.$clip[0]['scroll' + self.scrollPos] = pos;
 					
 					//force pause
-					self.funcMoveStop();
+					self.funcMovePause();
 					self.paused = true;
 				});	
 			} else {
@@ -352,8 +361,11 @@ $.simplyScroll.fn.extend({
 			}
 		},self.intervalDelay);
 	},
-	moveStop: function(moveDir) {
+	movePause: function() {
 		clearInterval(this.interval);	
+	},
+	moveStop: function(moveDir) {
+		this.movePause();
 		if (this.trigger!==null) {
 			if (typeof moveDir !== 'undefined') {
 				$(this.trigger).addClass('disabled');
