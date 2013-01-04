@@ -15,7 +15,13 @@
 
 $.fn.simplyScroll = function(options) {
 	return this.each(function() {
-		new $.simplyScroll(this,options);
+            // check to see if already attached to element
+	    if (undefined == $(this).data('simplyScroll')) {
+                // access  methods and properties like
+                // element.data('simplyScroll').method(arg1, arg2, ...)
+                var simplyScroll = new $.simplyScroll(this,options);
+                $(this).data('simplyScroll', simplyScroll);
+            }
 	});
 };
 
