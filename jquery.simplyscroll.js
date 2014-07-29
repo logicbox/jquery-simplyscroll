@@ -30,8 +30,9 @@ var defaults = {
 	direction: 'forwards', //'forwards' or 'backwards'.
 	pauseOnHover: true, //autoMode = loop|bounce only
 	pauseOnTouch: true, //" touch device only
-	pauseButton: false, //" generates an extra element to allow manual pausing 
-	startOnLoad: false //use this to delay starting of plugin until all page assets have loaded
+	pauseButton: false, //" generates an extra element to allow manual pausing
+	startOnLoad: false, //use this to delay starting of plugin until all page assets have loaded
+	initialOffset: 0
 };
 	
 $.simplyScroll = function(el,options) {
@@ -207,7 +208,7 @@ $.simplyScroll.fn.extend({
 			}
 		}
 		
-		this.resetPos() //ensure scroll position is reset
+		this.resetPos(this.o.initialOffset) //ensure scroll position is reset
 		
 		this.interval = null;	
 		this.intervalDelay = Math.floor(1000 / this.o.frameRate);
@@ -381,8 +382,8 @@ $.simplyScroll.fn.extend({
 	moveResume: function() {
 		this.movement=='forward' ? this.moveForward() : this.moveBack();
 	},
-	resetPos: function() {
-		this.$clip[0]['scroll' + this.scrollPos] = this.resetPosition;
+	resetPos: function(resetPos) {
+		this.$clip[0]['scroll' + this.scrollPos] = resetPos ? resetPos : this.resetPosition;
 	}
 });
 		  
