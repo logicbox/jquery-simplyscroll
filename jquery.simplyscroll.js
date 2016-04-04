@@ -209,8 +209,8 @@ $.simplyScroll.fn.extend({
 		
 		this.resetPos() //ensure scroll position is reset
 		
-		this.interval = null;	
-		this.intervalDelay = Math.floor(1000 / this.o.frameRate);
+		this.timestamp = null;	
+		this.interval = null;
 		
 		if (!(!this.isAuto && this.o.manualMode=='end')) { //loop mode
 			//ensure that speed is divisible by item width. Helps to always make images even not odd widths!
@@ -335,17 +335,19 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnBack.removeClass('disabled');
 		}
-		var frame = function() {
+		var frame = function(timestamp) {
 			if (self.$clip[0]['scroll' + self.scrollPos] < (self.posMax-self.clipMax)) {
-				self.$clip[0]['scroll' + self.scrollPos] += self.o.speed;
+				var delta  = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+				self.$clip[0]['scroll' + self.scrollPos] += delta;
 			} else if (self.isLoop) {
 				self.resetPos();
 			} else {
 				self.moveStop(self.movement);
 			}
+	      self.timestamp = timestamp;
 		  self.interval = requestAnimationFrame(frame);
 		};
-		frame();
+		requestAnimationFrame(frame);
 	},
 	moveBack: function() {
 		var self = this;
@@ -353,23 +355,27 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnForward.removeClass('disabled');
 		}
-		var frame = function() {
+		var frame = function(timestamp) {
 			if (self.$clip[0]['scroll' + self.scrollPos] > self.posMin) {
-				self.$clip[0]['scroll' + self.scrollPos] -= self.o.speed;
+			    var delta  = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+				self.$clip[0]['scroll' + self.scrollPos] -= delta;
 			} else if (self.isLoop) {
 				self.resetPos();
 			} else {
 				self.moveStop(self.movement);
 			}
+	        self.timestamp = timestamp;
 			self.interval = requestAnimationFrame(frame);
 		};
-		frame();
+		requestAnimationFrame(frame);
 	},
 	movePause: function() {
-		cancelAnimationFrame(this.interval);	
+		cancelAnimationFrame(this.interval);
+		this.timestamp = null;	
 	},
 	moveStop: function(moveDir) {
 		this.movePause();
+		this.timestamp = null;
 		if (this.trigger!==null) {
 			if (typeof moveDir !== 'undefined') {
 				$(this.trigger).addClass('disabled');
