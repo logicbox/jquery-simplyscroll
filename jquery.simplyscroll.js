@@ -335,7 +335,7 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnBack.removeClass('disabled');
 		}
-		self.interval = setInterval(function() {
+		var frame = function() {
 			if (self.$clip[0]['scroll' + self.scrollPos] < (self.posMax-self.clipMax)) {
 				self.$clip[0]['scroll' + self.scrollPos] += self.o.speed;
 			} else if (self.isLoop) {
@@ -343,7 +343,9 @@ $.simplyScroll.fn.extend({
 			} else {
 				self.moveStop(self.movement);
 			}
-		},self.intervalDelay);
+		  self.interval = requestAnimationFrame(frame);
+		};
+		frame();
 	},
 	moveBack: function() {
 		var self = this;
@@ -351,7 +353,7 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnForward.removeClass('disabled');
 		}
-		self.interval = setInterval(function() {
+		var frame = function() {
 			if (self.$clip[0]['scroll' + self.scrollPos] > self.posMin) {
 				self.$clip[0]['scroll' + self.scrollPos] -= self.o.speed;
 			} else if (self.isLoop) {
@@ -359,10 +361,12 @@ $.simplyScroll.fn.extend({
 			} else {
 				self.moveStop(self.movement);
 			}
-		},self.intervalDelay);
+			self.interval = requestAnimationFrame(frame);
+		};
+		frame();
 	},
 	movePause: function() {
-		clearInterval(this.interval);	
+		cancelAnimationFrame(this.interval);	
 	},
 	moveStop: function(moveDir) {
 		this.movePause();
