@@ -30,8 +30,9 @@ var defaults = {
 	direction: 'forwards', //'forwards' or 'backwards'.
 	pauseOnHover: true, //autoMode = loop|bounce only
 	pauseOnTouch: true, //" touch device only
-	pauseButton: false, //" generates an extra element to allow manual pausing 
-	startOnLoad: false //use this to delay starting of plugin until all page assets have loaded
+	pauseButton: false, //" generates an extra element to allow manual pausing
+	startOnLoad: false, //use this to delay starting of plugin until all page assets have loaded
+	initialOffset: 0
 };
 	
 $.simplyScroll = function(el,options) {
@@ -207,10 +208,10 @@ $.simplyScroll.fn.extend({
 			}
 		}
 		
-		this.resetPos() //ensure scroll position is reset
+		this.resetPos(this.o.initialOffset) //ensure scroll position is reset
 		
-		this.interval = null;	
-		this.intervalDelay = Math.floor(1000 / this.o.frameRate);
+		this.timestamp = null;	
+		this.interval = null;
 		
 		if (!(!this.isAuto && this.o.manualMode=='end')) { //loop mode
 			//ensure that speed is divisible by item width. Helps to always make images even not odd widths!
@@ -335,15 +336,19 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnBack.removeClass('disabled');
 		}
-		self.interval = setInterval(function() {
+		var frame = function(timestamp) {
 			if (self.$clip[0]['scroll' + self.scrollPos] < (self.posMax-self.clipMax)) {
-				self.$clip[0]['scroll' + self.scrollPos] += self.o.speed;
+				var delta  = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+				self.$clip[0]['scroll' + self.scrollPos] += delta;
 			} else if (self.isLoop) {
 				self.resetPos();
 			} else {
 				self.moveStop(self.movement);
 			}
-		},self.intervalDelay);
+	      self.timestamp = timestamp;
+		  self.interval = requestAnimationFrame(frame);
+		};
+		requestAnimationFrame(frame);
 	},
 	moveBack: function() {
 		var self = this;
@@ -351,21 +356,27 @@ $.simplyScroll.fn.extend({
 		if (this.trigger !== null) {
 			this.$btnForward.removeClass('disabled');
 		}
-		self.interval = setInterval(function() {
+		var frame = function(timestamp) {
 			if (self.$clip[0]['scroll' + self.scrollPos] > self.posMin) {
-				self.$clip[0]['scroll' + self.scrollPos] -= self.o.speed;
+			    var delta  = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+				self.$clip[0]['scroll' + self.scrollPos] -= delta;
 			} else if (self.isLoop) {
 				self.resetPos();
 			} else {
 				self.moveStop(self.movement);
 			}
-		},self.intervalDelay);
+	        self.timestamp = timestamp;
+			self.interval = requestAnimationFrame(frame);
+		};
+		requestAnimationFrame(frame);
 	},
 	movePause: function() {
-		clearInterval(this.interval);	
+		cancelAnimationFrame(this.interval);
+		this.timestamp = null;	
 	},
 	moveStop: function(moveDir) {
 		this.movePause();
+		this.timestamp = null;
 		if (this.trigger!==null) {
 			if (typeof moveDir !== 'undefined') {
 				$(this.trigger).addClass('disabled');
@@ -381,8 +392,8 @@ $.simplyScroll.fn.extend({
 	moveResume: function() {
 		this.movement=='forward' ? this.moveForward() : this.moveBack();
 	},
-	resetPos: function() {
-		this.$clip[0]['scroll' + this.scrollPos] = this.resetPosition;
+	resetPos: function(resetPos) {
+		this.$clip[0]['scroll' + this.scrollPos] = resetPos ? resetPos : this.resetPosition;
 	}
 });
 		  
