@@ -1,6 +1,6 @@
 {
   "name": "jquery-simplyscroll",
-  "version": "2.0.6",
+  "version": "2.1.0",
   "description": "A jQuery plugin for scrolling a set of images/elements",
   "main": "src/jquery.simplyscroll.js",
   "style": "src/jquery.simplyscroll.css",
