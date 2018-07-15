@@ -16,14 +16,29 @@ framerate are fully configureable to accommodate lower spec systems.
 * RTL support, normalises browser RTL scroll implementations
 * Supports looped scrolling (infinite effect)
 * Fully customisable via CSS & HTML
-* jQuery 1.2.6 and higher all the way
+* jQuery 1.2.6 and higher
 * Works on all modern browsers 
 
 [View plugin site for download links, examples and more info](http://logicbox.net/jquery/simplyscroll/)
 
-## Install
+## Installation
 
-`yarn add jquery-simplyscroll` or `npm install jquery-simplyscroll`
+`yarn add jquery-simplyscroll` or `npm install jquery-simplyscroll --save`
+
+## Basic Usage
+
+```js
+var jQuery = require('jquery');
+require('jquery-simplyscroll');
+
+(function($) {
+  $(document).on('ready', function() {
+    $("#scroller").simplyScroll({
+      speed: 1
+    });
+  });
+})(jQuery);
+```
 
 ## Version History ##
 
@@ -38,7 +53,7 @@ framerate are fully configureable to accommodate lower spec systems.
 
 ## Contributors ##
 
-Thanks to all who over in the years have used, given feedback and contributed to this plugin. Including recently:
+Thanks to all who over the years have used, given feedback and contributed to this plugin. Including recently:
 
 Paloaltowil (https://github.com/paloaltowil)
 
