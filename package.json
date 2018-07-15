@@ -1,0 +1,29 @@
+{
+  "name": "jquery-simplyscroll",
+  "version": "2.0.6",
+  "description": "A jQuery plugin for scrolling a set of images/elements",
+  "main": "src/jquery.simplyscroll.js",
+  "style": "src/jquery.simplyscroll.css",
+  "repository": "https://github.com/logicbox/jquery-simplyscroll.git",
+  "author": "Will Kelly <will@logicbox.net>",
+  "license": "MIT",
+  "private": false,
+  "homepage": "http://logicbox.net/jquery/simply-scroll",
+  "contributors": [
+    "paloaltowil (https://github.com/paloaltowil)",
+    "Zevero (https://github.com/zevero)",
+    "bre7 (https://github.com/bre7)"
+  ],
+  "dependencies": {
+    "jquery": "^3.3.1"
+  },
+  "devDependencies": {
+    "browserify": "^16.2.2",
+    "budo": "^11.3.2",
+    "uglify-js": "^3.4.4"
+  },
+  "scripts": {
+    "start": "budo index.js:bundle.js --open --live",
+    "build": "uglifyjs ./jquery.simplyscroll.js --compress --mangle reserved=['$','require','exports'] --comments --output ./jquery.simplyscroll.min.js"
+  }
+}
