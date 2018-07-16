@@ -1,5 +1,5 @@
 var $ = require('jquery');
-require('./jquery.simplyscroll.min');
+require('./jquery.simplyscroll');
 
 var el = document.querySelector('#scroller');
 
