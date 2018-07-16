@@ -1,18 +1,15 @@
 jQuery simplyScroll 2
 =====================
 
-## About
-
 Created by Will Kelly [@logicbox](http://twitter.com/logicbox)
 
 simplyScroll is a jQuery plugin that can animate (scroll) a set of elements either automatically or manually, 
-horizontally or vertically, forwards or backwards. This plugin can be performance intensive, so speed and 
-framerate are fully configureable to accommodate lower spec systems.
+horizontally or vertically, forwards or backwards.
 
 ## Features ##
 
 * Supports scrolling both horizontally and vertically both forwards and backwards
-* Uses DOM ScrollTop/ScrollLeft for optimal performance
+* Uses DOM ScrollTop/ScrollLeft only
 * RTL support, normalises browser RTL scroll implementations
 * Supports looped scrolling (infinite effect)
 * Fully customisable via CSS & HTML
@@ -21,27 +18,24 @@ framerate are fully configureable to accommodate lower spec systems.
 
 [View plugin site for download links, examples and more info](http://logicbox.net/jquery/simplyscroll/)
 
-## Installation
+## NPM Installation
 
 `yarn add jquery-simplyscroll` or `npm install jquery-simplyscroll --save`
 
-## Basic Usage
+## Basic Usage (CommonJS)
 
 ```js
-var jQuery = require('jquery');
+var $ = require('jquery');
 require('jquery-simplyscroll');
 
-(function($) {
-  $(document).on('ready', function() {
-    $("#scroller").simplyScroll({
-      speed: 1
-    });
-  });
-})(jQuery);
+$("#scroller").simplyScroll({
+  speed: 1
+});
 ```
 
 ## Version History ##
 
+* 2.1.1 16/07/18 - Code tidy-up & doc changes/fixes
 * 2.1.0 15/07/18 - NPM support, install & build process + requestAnimationFrame fix
 * 2.0.6 23/06/18 - Added initialOffset & replaced setInterval with requestAnimationFrame
 * 2.0.5 20/05/12 - Bounce mode fixed. Touch scroll works as expected, disabled when links are present
@@ -55,8 +49,5 @@ require('jquery-simplyscroll');
 
 Thanks to all who over the years have used, given feedback and contributed to this plugin. Including recently:
 
-Paloaltowil (https://github.com/paloaltowil)
-
-Zevero (https://github.com/zevero)
-
-Bre7 (https://github.com/bre7)
+Paloaltowil (https://github.com/paloaltowil), Zevero (https://github.com/zevero), Bre7 (https://github.com/bre7)
+& Jnhasty (https://github.com/jnhasty/)

@@ -1,10 +1,10 @@
-var jQuery = require('jquery');
-require('./jquery.simplyscroll');
+var $ = require('jquery');
+require('./jquery.simplyscroll.min');
 
-(function($) {
-  $(function() {
-    $("#scroller").simplyScroll({
-      speed: 1
-    });
-  });
-})(jQuery);
+var el = document.querySelector('#scroller');
+
+$(el).simplyScroll({
+  speed: 1
+});
+
+console.log($(el).data());

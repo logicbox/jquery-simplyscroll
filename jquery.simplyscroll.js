@@ -32,13 +32,13 @@
   var defaults = {
     customClass: 'simply-scroll',
     frameRate: 24, //No of movements per second
-    speed: 1, //No of pixels per frame
+    speed: 1, //Intended no. of pixels per frame (/w scroller size & requestAnimationFrame this may not be honoured)
     orientation: 'horizontal', //'horizontal or 'vertical' - not to be confused with device orientation
     auto: true,
-    autoMode: 'loop', //auto = true, 'loop' or 'bounce',
-    manualMode: 'end', //auto = false, 'loop' or 'end'
+    autoMode: 'loop', //if auto == true, use 'loop' or 'bounce',
+    manualMode: 'end', //if auto == false, use 'loop' or 'end'
     direction: 'forwards', //'forwards' or 'backwards'.
-    pauseOnHover: true, //autoMode = loop|bounce only
+    pauseOnHover: true, //if autoMode == loop || bounce only
     pauseOnTouch: true, //" touch device only
     pauseButton: false, //" generates an extra element to allow manual pausing
     startOnLoad: false, //use this to delay starting of plugin until all page assets have loaded
@@ -50,11 +50,13 @@
     var self = this;
 
     this.o = $.extend({}, defaults, options || {});
-    this.isAuto = this.o.auto!==false && this.o.autoMode.match(/^loop|bounce$/)!==null;
-    this.isHorizontal = this.o.orientation.match(/^horizontal|vertical$/)!==null && this.o.orientation==defaults.orientation;
-    this.isRTL = this.isHorizontal && $("html").attr('dir') == 'rtl';
-    this.isForwards = !this.isAuto  || (this.isAuto && this.o.direction.match(/^forwards|backwards$/)!==null && this.o.direction==defaults.direction) && !this.isRTL;
-    this.isLoop = this.isAuto && this.o.autoMode == 'loop' || !this.isAuto && this.o.manualMode == 'loop';
+    this.isAuto = this.o.auto !== false && this.o.autoMode.match(/^loop|bounce$/) !== null;
+    this.isHorizontal =
+      this.o.orientation.match(/^horizontal|vertical$/) !== null && this.o.orientation === defaults.orientation;
+    this.isRTL = this.isHorizontal && $("html").attr('dir') === 'rtl';
+    this.isForwards = !this.isAuto && !this.isRTL ||
+      (this.isAuto && this.o.direction.match(/^forwards|backwards$/) !== null && this.o.direction === defaults.direction);
+    this.isLoop = this.isAuto && this.o.autoMode === 'loop' || !this.isAuto && this.o.manualMode === 'loop';
 
     this.supportsTouch = ('createTouch' in document);
 
@@ -84,7 +86,6 @@
 
     //wrap an extra div around the whole lot if elements scrolled aren't equal
     if ($items.length > 1) {
-
       var extra_wrap = false,
         total = 0;
 
@@ -117,10 +118,11 @@
 
   $.simplyScroll.fn = $.simplyScroll.prototype = {};
 
-  $.simplyScroll.fn.extend = $.simplyScroll.extend = $.extend;
+  $.simplyScroll.fn.extend = $.extend;
 
   $.simplyScroll.fn.extend({
     init: function() {
+      var self = this;
 
       this.$items = this.$list.children();
       this.$clip = this.$list.parent(); //this is the element that scrolls
@@ -151,7 +153,7 @@
       var addItems = Math.ceil(this.clipMax / this.itemMax);
 
       //auto scroll loop & manual scroll bounce or end(to-end)
-      if (this.isAuto && this.o.autoMode=='loop') {
+      if (this.isAuto && this.o.autoMode === 'loop') {
 
         this.$list.css(this.dimension,this.posMax+(this.itemMax*addItems) +'px');
 
@@ -173,7 +175,7 @@
         }
 
         //manual and loop
-      } else if (!this.isAuto && this.o.manualMode=='loop') {
+      } else if (!this.isAuto && this.o.manualMode === 'loop') {
 
         this.posMax += this.itemMax * addItems;
 
@@ -181,21 +183,19 @@
 
         this.posMax += (this.clipMax - this.o.speed);
 
-        var items_append  = this.$items.slice(0,addItems).clone(true).appendTo(this.$list);
-        var items_prepend = this.$items.slice(-addItems).clone(true).prependTo(this.$list);
+        this.$items.slice(0,addItems).clone(true).appendTo(this.$list);
+        this.$items.slice(-addItems).clone(true).prependTo(this.$list);
 
         this.resetPositionForwards = this.resetPosition = addItems * this.itemMax;
         this.resetPositionBackwards = this.$items.length * this.itemMax;
 
         //extra events to force scroll direction change
-        var self = this;
-
-        this.$btnBack.bind(this.events.start,function() {
+        this.$btnBack.bind(this.events.start, function() {
           self.isForwards = false;
           self.resetPosition = self.resetPositionBackwards;
         });
 
-        this.$btnForward.bind(this.events.start,function() {
+        this.$btnForward.bind(this.events.start, function() {
           self.isForwards = true;
           self.resetPosition = self.resetPositionForwards;
         });
@@ -218,12 +218,12 @@
         }
       }
 
-      this.resetPos(this.o.initialOffset) //ensure scroll position is reset
+      this.resetPos(this.o.initialOffset);  //ensure scroll position is reset
 
       this.timestamp = null;
       this.interval = null;
 
-      if (!(!this.isAuto && this.o.manualMode=='end')) { //loop mode
+      if (!(!this.isAuto && this.o.manualMode === 'end')) { //loop mode
         //ensure that speed is divisible by item width. Helps to always make images even not odd widths!
         while (this.itemMax % this.o.speed !== 0) {
           this.o.speed--;
@@ -233,37 +233,35 @@
         }
       }
 
-
-      var self = this;
       this.trigger = null;
+
       this.funcMoveBack = function(e) {
         if (e !== undefined) {
           e.preventDefault();
         }
-        self.trigger = !self.isAuto && self.o.manualMode=='end' ? this : null;
+        self.trigger = !self.isAuto && self.o.manualMode === 'end' ? this : null;
         if (self.isAuto) {
           self.isForwards ? self.moveBack() : self.moveForward();
         } else {
           self.moveBack();
         }
       };
-      this.funcMoveForward = function(e) {
 
+      this.funcMoveForward = function(e) {
         if (e !== undefined) {
           e.preventDefault();
         }
-        self.trigger = !self.isAuto && self.o.manualMode=='end' ? this : null;
+        self.trigger = !self.isAuto && self.o.manualMode === 'end' ? this : null;
         if (self.isAuto) {
           self.isForwards ? self.moveForward() : self.moveBack();
         } else {
           self.moveForward();
         }
       };
+
       this.funcMovePause = function() { self.movePause(); };
       this.funcMoveStop = function() { self.moveStop(); };
       this.funcMoveResume = function() { self.moveResume(); };
-
-
 
       if (this.isAuto) {
 
@@ -278,7 +276,7 @@
             self.funcMoveResume();
           }
           return self.paused;
-        };
+        }
 
         //disable pauseTouch when links are present
         if (this.supportsTouch && this.$items.find('a').length) {
@@ -286,12 +284,14 @@
         }
 
         if (this.isAuto && this.o.pauseOnHover && !this.supportsTouch) {
-          this.$clip.bind(this.events.start,this.funcMovePause).bind(this.events.end,this.funcMoveResume);
+          this.$clip
+            .bind(this.events.start, this.funcMovePause)
+            .bind(this.events.end, this.funcMoveResume);
         } else if (this.isAuto && this.o.pauseOnTouch && !this.o.pauseButton && this.supportsTouch) {
 
           var touchStartPos, scrollStartPos;
 
-          this.$clip.bind(this.events.start,function(e) {
+          this.$clip.bind(this.events.start, function(e) {
             togglePause();
             var touch = e.originalEvent.touches[0];
             touchStartPos = self.isHorizontal ? touch.pageX : touch.pageY;
@@ -321,7 +321,7 @@
           if (this.o.pauseButton) {
 
             this.$btnPause = $(".simply-scroll-btn-pause",this.$container)
-              .bind('click',function(e) {
+              .bind('click', function(e) {
                 e.preventDefault();
                 togglePause() ? $(this).addClass('active') : $(this).removeClass('active');
               });
@@ -332,16 +332,19 @@
 
         this.$btnBack
           .addClass('simply-scroll-btn' + ' ' + this.moveBackClass)
-          .bind(this.events.start,this.funcMoveBack).bind(this.events.end,this.funcMoveStop);
+          .bind(this.events.start, this.funcMoveBack)
+          .bind(this.events.end, this.funcMoveStop);
         this.$btnForward
           .addClass('simply-scroll-btn' + ' ' + this.moveForwardClass)
-          .bind(this.events.start,this.funcMoveForward).bind(this.events.end,this.funcMoveStop);
+          .bind(this.events.start,this.funcMoveForward)
+          .bind(this.events.end, this.funcMoveStop);
 
-        if (this.o.manualMode == 'end') {
+        if (this.o.manualMode === 'end') {
           !this.isRTL ? this.$btnBack.addClass('disabled') : this.$btnForward.addClass('disabled');
         }
       }
     },
+
     moveForward: function() {
       var self = this;
       this.movement = 'forward';
@@ -350,8 +353,8 @@
       }
       var frame = function(timestamp) {
         if (self.$clip[0]['scroll' + self.scrollPos] < (self.posMax-self.clipMax)) {
-          var delta  = Math.ceil((timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate);
-          self.$clip[0]['scroll' + self.scrollPos] += delta;
+          var delta = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+          self.$clip[0]['scroll' + self.scrollPos] += Math.ceil(delta); //scroll pos. needs to be an int
         } else if (self.isLoop) {
           self.resetPos();
         } else {
@@ -362,6 +365,7 @@
       };
       requestAnimationFrame(frame);
     },
+
     moveBack: function() {
       var self = this;
       this.movement = 'back';
@@ -370,8 +374,8 @@
       }
       var frame = function(timestamp) {
         if (self.$clip[0]['scroll' + self.scrollPos] > self.posMin) {
-          var delta  = Math.ceil((timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate);
-          self.$clip[0]['scroll' + self.scrollPos] -= delta;
+          var delta = (timestamp - (self.timestamp || timestamp)) * self.o.speed/self.o.frameRate;
+          self.$clip[0]['scroll' + self.scrollPos] -= Math.ceil(delta);
         } else if (self.isLoop) {
           self.resetPos();
         } else {
@@ -382,10 +386,12 @@
       };
       requestAnimationFrame(frame);
     },
+
     movePause: function() {
       cancelAnimationFrame(this.interval);
       this.timestamp = null;
     },
+
     moveStop: function(moveDir) {
       this.movePause();
       this.timestamp = null;
@@ -396,14 +402,16 @@
         this.trigger = null;
       }
       if (this.isAuto) {
-        if (this.o.autoMode=='bounce') {
-          moveDir == 'forward' ? this.moveBack() : this.moveForward();
+        if (this.o.autoMode === 'bounce') {
+          moveDir === 'forward' ? this.moveBack() : this.moveForward();
         }
       }
     },
+
     moveResume: function() {
-      this.movement=='forward' ? this.moveForward() : this.moveBack();
+      this.movement === 'forward' ? this.moveForward() : this.moveBack();
     },
+
     resetPos: function(resetPos) {
       this.$clip[0]['scroll' + this.scrollPos] = resetPos ? resetPos : this.resetPosition;
     }
